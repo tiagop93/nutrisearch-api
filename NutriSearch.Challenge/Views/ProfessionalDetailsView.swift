@@ -9,14 +9,20 @@ import SwiftUI
 
 struct ProfessionalDetailsView: View {
     
-    let professional: Professional
+    @State private var viewModel = ProfessionalDetailsViewModel(networkClient: NetworkClient())
+    let professionalId: Int
     
     var body: some View {
         VStack {
-            HeaderView(professional: professional)
-            AboutMeView(text: professional.aboutMe)
-                .padding()
-            Spacer()
+            if let professional = viewModel.professional {
+                HeaderView(professional: professional)
+                AboutMeView(text: professional.aboutMe)
+                    .padding()
+                Spacer()
+            }
+        }
+        .onAppear {
+            viewModel.fetchProfessionalDetails(id: professionalId)
         }
     }
 }
@@ -99,6 +105,7 @@ extension ProfessionalDetailsView {
                                     }
                                 }
                             )
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         
                         if hasTextOverflow {
                             Button(action: {
@@ -127,16 +134,5 @@ extension ProfessionalDetailsView {
 }
 
 #Preview {
-    let mockProfessional = Professional(
-        id: 1,
-        name: "Emma Smith",
-        expertise: ["Weight Loss", "Nutrition", "Sports Nutrition"],
-        languages: ["English", "Spanish"],
-        rating: 4,
-        ratingCount: 125,
-        profilePictureURL: URL(string: "https://nutrisearch.vercel.app/static/image-1.jpg"),
-        aboutMe: "Dr. Sandy Williams is passionate about helping individuals achieve their health goals through personalized nutrition. He works in United States and speaks English, Spanish, and Italian. There is so much more to learn about Dr. Sandy Williams. Give him a call today! You will get a free consultation. Join the thousands of happy clients who have achieved their health goals with Dr. Sandy Williams."
-    )
-    
-    ProfessionalDetailsView(professional: mockProfessional)
+    ProfessionalDetailsView(professionalId: 4)
 }

@@ -22,7 +22,7 @@ struct NetworkClient: NetworkService {
     // MARK: Network Methods
     
     func request<T>(endpoint: Endpoint, queryItems: [URLQueryItem]?) async throws -> T where T : Decodable {
-        guard let url = endpoint.url(), var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+        guard let endpointUrl = endpoint.url(), var urlComponents = URLComponents(url: endpointUrl, resolvingAgainstBaseURL: true) else {
             throw NetworkError.invalidURL
         }
         
@@ -30,7 +30,11 @@ struct NetworkClient: NetworkService {
             urlComponents.queryItems = queryItems
         }
         
-        var request = URLRequest(url: url)
+        guard let url = urlComponents.url else {
+            throw NetworkError.invalidURL
+        }
+        
+        let request = URLRequest(url: url)
         
         let (data, response) = try await session.data(for: request)
         
@@ -58,5 +62,9 @@ struct NetworkClient: NetworkService {
         }
         
         return try await request(endpoint: Endpoint.professionalsSearch, queryItems: queryItems)
+    }
+    
+    func professionalDetails(id: Int) async throws -> Professional {
+        try await request(endpoint: Endpoint.professionalDetails(id: id), queryItems: nil)
     }
 }

@@ -9,11 +9,12 @@ import SwiftUI
 
 struct DropdownView: View {
     
-    @State private var selectedSortOption: SortOption = .bestMatch
+    @Environment(SearchProfessionalsViewModel.self) private var viewModel
     
     var body: some View {
+        @Bindable var viewModel = viewModel
         VStack {
-            Picker("Sort", selection: $selectedSortOption) {
+            Picker("Sort", selection: $viewModel.sortOption) {
                 ForEach(SortOption.allCases) { option in
                     Text(option.rawValue).tag(option)
                 }
@@ -46,4 +47,5 @@ enum SortOption: String, CaseIterable, Identifiable {
 
 #Preview {
     DropdownView()
+        .environment(SearchProfessionalsViewModel(networkClient: NetworkClient()))
 }

@@ -19,13 +19,13 @@ enum NetworkConstants {
 
 // MARK: - Network Endpoint Definition
 enum Endpoint {
-    case professionals
+    case professionalDetails(id:Int)
     case professionalsSearch
     
     var path: String {
         switch self {
-        case .professionals:
-            return "professionals"
+        case .professionalDetails(let id):
+            return "professionals/\(id)"
         case .professionalsSearch:
             return "professionals/search"
         }

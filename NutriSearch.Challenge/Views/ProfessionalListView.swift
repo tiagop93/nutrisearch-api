@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ProfessionalListView: View {
     
-    @Environment(ProfessionalsViewModel.self) private var viewModel
+    @Environment(SearchProfessionalsViewModel.self) private var viewModel
+    @State private var firstTime = true
     
     var body: some View {
         List {
@@ -19,7 +20,11 @@ struct ProfessionalListView: View {
                     .frame(maxWidth: .infinity, minHeight: 100)
             case .success:
                 ForEach(viewModel.professionals) { professional in
-                    ProfessionalCardView(professional: professional)
+                    NavigationLink {
+                        ProfessionalDetailsView(professionalId: professional.id)
+                    } label: {
+                        ProfessionalCardView(professional: professional)
+                    }
                 }
             case .failed:
                 ContentUnavailableView {
@@ -33,12 +38,15 @@ struct ProfessionalListView: View {
             
         }
         .onAppear {
-            viewModel.searchProfessionals()
+            if firstTime {
+                viewModel.searchProfessionals()
+                firstTime = false
+            }
         }
     }
 }
 
 #Preview {
     ProfessionalListView()
-        .environment(ProfessionalsViewModel(networkClient: NetworkClient()))
+        .environment(SearchProfessionalsViewModel(networkClient: NetworkClient()))
 }

@@ -13,6 +13,7 @@ protocol NetworkService {
     func request<T: Decodable>(endpoint: Endpoint, queryItems: [URLQueryItem]?) async throws -> T
     
     func searchProfessionals(limit: Int, offset: Int, sortBy: String?) async throws -> SearchResponse
+    func professionalDetails(id: Int) async throws -> Professional
 }
 
 // MARK: - Network errors

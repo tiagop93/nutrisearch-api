@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State private var viewModel = ProfessionalsViewModel(networkClient: NetworkClient())
+    @State private var viewModel = SearchProfessionalsViewModel(networkClient: NetworkClient())
     
     var body: some View {
         NavigationStack {
