@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct ProfessionalCardView: View {
+    
     let professional: Professional
     
     var body: some View {
         VStack(alignment: .leading) {
             HStack(alignment: .top, spacing: 12) {
                 // Profile Image
-                ImageView(imageURL: professional.profilePictureURL)
+                PhotoView(url: professional.profilePictureURL)
                 
                 // Details
                 VStack(alignment: .leading, spacing: 4) {
@@ -35,72 +36,7 @@ struct ProfessionalCardView: View {
 // MARK: - Professional Card Components
 
 extension ProfessionalCardView {
-    
-    struct ImageView: View {
-        
-        let imageURL: URL?
-        
-        var body: some View {
-            Group {
-                if let imageURL = imageURL {
-                    AsyncImage(url: imageURL) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        case .failure:
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(.blue)
-                        @unknown default:
-                            EmptyView()
-                        }
-                    }
-                } else {
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.blue)
-                }
-            }
-            .frame(width: 80, height: 80)
-            .background(Color.blue.opacity(0.1))
-            .cornerRadius(8)
-        }
-    }
-    
-    struct NameView: View {
-        
-        let name: String
-        
-        var body: some View {
-            Text(name)
-                .font(.headline)
-        }
-    }
-    
-    struct RatingView: View {
-        
-        let rating: Int
-        let ratingCount: Int
-        
-        var body: some View {
-            HStack(alignment: .center, spacing: 2) {
-                ForEach(1...5, id: \.self) { index in
-                    Image(systemName: index <= rating ? "star.fill" : "star")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 14))
-                }
-                
-                Text("\(rating)/5 (\(ratingCount))")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-        }
-    }
-    
+  
     struct LanguagesView: View {
         
         let languages: [String]

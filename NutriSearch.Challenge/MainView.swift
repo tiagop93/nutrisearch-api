@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MainView: View {
+    
+    @State private var viewModel = ProfessionalsViewModel(networkClient: NetworkClient())
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -15,11 +18,13 @@ struct MainView: View {
                 
                 Spacer()
                 
+                ProfessionalListView()
                 
             }
             .navigationTitle("NutriSearch")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .environment(viewModel)
     }
 }
 
