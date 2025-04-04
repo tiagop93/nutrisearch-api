@@ -14,10 +14,8 @@ struct ProfessionalCardView: View {
     var body: some View {
         VStack(alignment: .leading) {
             HStack(alignment: .top, spacing: 12) {
-                // Profile Image
                 PhotoView(url: professional.profilePictureURL)
                 
-                // Details
                 VStack(alignment: .leading, spacing: 4) {
                     NameView(name: professional.name)
                     RatingView(rating: professional.rating, ratingCount: professional.ratingCount)
@@ -29,14 +27,14 @@ struct ProfessionalCardView: View {
             
             ExpertiseView(expertise: professional.expertise)
         }
-        .padding()
+        .padding(.vertical, 16)
     }
 }
 
 // MARK: - Professional Card Components
 
 extension ProfessionalCardView {
-  
+    
     struct LanguagesView: View {
         
         let languages: [String]
@@ -57,17 +55,34 @@ extension ProfessionalCardView {
     struct ExpertiseView: View {
         
         let expertise: [String]
+        private let idealItemCount = 2
         
         var body: some View {
+            ViewThatFits(in: .horizontal) {
+                // All in one line
+                tagsRow(items: expertise)
+                
+                // Split in 2 per line
+                VStack(alignment: .leading, spacing: 8) {
+                    tagsRow(items: Array(expertise.prefix(idealItemCount)))
+                    if expertise.count > idealItemCount {
+                        tagsRow(items: Array(expertise.dropFirst(idealItemCount)))
+                    }
+                }
+            }
+        }
+        
+        private func tagsRow(items: [String]) -> some View {
             HStack {
-                ForEach(expertise, id: \.self) { expertise in
-                    Text(expertise)
+                ForEach(items, id: \.self) { item in
+                    Text(item)
                         .font(.caption)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.gray.opacity(0.2))
+                        .padding(.vertical, 8)
+                        .background(.gray.opacity(0.2))
                         .cornerRadius(12)
                 }
+                Spacer()
             }
         }
     }
@@ -77,7 +92,7 @@ extension ProfessionalCardView {
     let mockProfessional = Professional(
         id: 1,
         name: "Emma Smith",
-        expertise: ["Weight Loss", "Nutrition", "Sports Nutrition"],
+        expertise: ["Weight Loss", "Nutrition", "Sports Nutrition", "Sports Nutrition", "Sports Nutrition"],
         languages: ["English", "Spanish"],
         rating: 4,
         ratingCount: 125,

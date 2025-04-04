@@ -26,6 +26,10 @@ struct ProfessionalListView: View {
                         ProfessionalCardView(professional: professional)
                     }
                 }
+                
+                if viewModel.hasMorePages {
+                    loadMoreView
+                }
             case .failed:
                 ContentUnavailableView {
                     Text("Couldn't find any professionals")
@@ -41,6 +45,26 @@ struct ProfessionalListView: View {
             if firstTime {
                 viewModel.searchProfessionals()
                 firstTime = false
+            }
+        }
+    }
+}
+
+extension ProfessionalListView {
+    
+    private var loadMoreView: some View {
+        Group {
+            if viewModel.isLoadingMore {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 100)
+                    .padding()
+            } else {
+                // Invisible view that triggers loading more when it "appears"
+                Color.clear
+                    .frame(height: 20)
+                    .onAppear {
+                        viewModel.loadMoreProfessionals()
+                    }
             }
         }
     }

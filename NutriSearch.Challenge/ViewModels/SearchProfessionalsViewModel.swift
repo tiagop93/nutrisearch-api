@@ -22,9 +22,29 @@ class SearchProfessionalsViewModel: BaseViewModel {
     @ObservationIgnored
     var sortOption$ = CurrentValueSubject<SortOption, Never>(.bestMatch)
     
+    // MARK: Pagination
+    
+    @ObservationIgnored
+    var currentPage = 0
+    @ObservationIgnored
+    var itemsPerPage = 4
+    @ObservationIgnored
+    var totalItems = 0
+    @ObservationIgnored
+    var isLoadingMore = false
+    @ObservationIgnored
+    var currentOffset: Int {
+        currentPage * itemsPerPage
+    }
+    
+    // MARK: Published Properties
+    
     var professionals: [Professional] = []
     var sortOption: SortOption = .bestMatch {
         didSet { sortOption$.send(sortOption) }
+    }
+    var hasMorePages: Bool {
+        professionals.count < totalItems
     }
     
     // MARK: Initialization
@@ -51,21 +71,54 @@ class SearchProfessionalsViewModel: BaseViewModel {
     
     // MARK: - Public Methods
     
-    func searchProfessionals() {
-        state = .loading
+    func searchProfessionals(isInitialLoad: Bool = true) {
+        if isInitialLoad {
+            state = .loading
+            currentPage = 0
+        } else if isLoadingMore || !hasMorePages {
+            return
+        }
+        
+        if !isInitialLoad {
+            isLoadingMore = true
+        }
         
         Task {
             do {
                 print("Searching for professionals")
-                let searchResponse = try await networkClient.searchProfessionals(limit: 4, offset: 0, sortBy: sortOption.apiParameter)
-                professionals = searchResponse.professionals
+                let searchResponse = try await networkClient.searchProfessionals(
+                    limit: itemsPerPage,
+                    offset: currentOffset,
+                    sortBy: sortOption.apiParameter
+                )
+                
+                totalItems = searchResponse.count
+                
+                if isInitialLoad {
+                    professionals = searchResponse.professionals
+                } else {
+                    professionals.append(contentsOf: searchResponse.professionals)
+                }
                 
                 state = .success
+                
+                if !isInitialLoad {
+                    isLoadingMore = false
+                }
             } catch {
                 print("Error searching for professionals: \(error.localizedDescription)")
                 state = .failed
+                
+                if !isInitialLoad {
+                    isLoadingMore = false
+                }
             }
         }
-        
+    }
+
+    func loadMoreProfessionals() {
+        guard !isLoadingMore && hasMorePages else { return }
+        currentPage += 1
+        searchProfessionals(isInitialLoad: false)
     }
 }
