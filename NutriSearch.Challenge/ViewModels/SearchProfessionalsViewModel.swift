@@ -12,46 +12,45 @@ import Combine
 @MainActor
 class SearchProfessionalsViewModel: BaseViewModel {
     
-    // MARK: Properties
+    // MARK: - Properties
     
     @ObservationIgnored
     private let networkClient: NetworkService
+    
     @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
-    /// Workaround due to the @Observable macro limitation that doesn't allow to directly create a combine pipeline on the sortOption.
+    
     @ObservationIgnored
     var sortOption$ = CurrentValueSubject<SortOption, Never>(.bestMatch)
     
-    // MARK: Pagination
+    // MARK: - Pagination
     
-    @ObservationIgnored
-    var currentPage = 0
-    @ObservationIgnored
-    var itemsPerPage = 4
-    @ObservationIgnored
-    var totalItems = 0
-    @ObservationIgnored
-    var isLoadingMore = false
+    @ObservationIgnored var currentPage = 0
+    @ObservationIgnored var itemsPerPage = 4
+    @ObservationIgnored var totalItems = 0
+    @ObservationIgnored var isLoadingMore = false
+    
     @ObservationIgnored
     var currentOffset: Int {
         currentPage * itemsPerPage
     }
     
-    // MARK: Published Properties
+    // MARK: - Published Properties
     
     var professionals: [Professional] = []
+    
     var sortOption: SortOption = .bestMatch {
         didSet { sortOption$.send(sortOption) }
     }
+    
     var hasMorePages: Bool {
         professionals.count < totalItems
     }
     
-    // MARK: Initialization
+    // MARK: - Init
     
     init(networkClient: NetworkService) {
         self.networkClient = networkClient
-        
         super.init()
         setupBindings()
     }
@@ -63,7 +62,7 @@ class SearchProfessionalsViewModel: BaseViewModel {
             .sink { [weak self] newSortOption in
                 guard let self = self else { return }
                 Task {
-                    self.searchProfessionals()
+                    await self.searchProfessionals()
                 }
             }
             .store(in: &cancellables)
@@ -71,7 +70,7 @@ class SearchProfessionalsViewModel: BaseViewModel {
     
     // MARK: - Public Methods
     
-    func searchProfessionals(isInitialLoad: Bool = true) {
+    func searchProfessionals(isInitialLoad: Bool = true) async {
         if isInitialLoad {
             state = .loading
             currentPage = 0
@@ -83,41 +82,37 @@ class SearchProfessionalsViewModel: BaseViewModel {
             isLoadingMore = true
         }
         
-        Task {
-            
-            defer {
-                if !isInitialLoad {
-                    isLoadingMore = false
-                }
-            }
-            
-            do {
-                print("Searching for professionals")
-                let searchResponse = try await networkClient.searchProfessionals(
-                    limit: itemsPerPage,
-                    offset: currentOffset,
-                    sortBy: sortOption.apiParameter
-                )
-                
-                totalItems = searchResponse.count
-                
-                if isInitialLoad {
-                    professionals = searchResponse.professionals
-                } else {
-                    professionals.append(contentsOf: searchResponse.professionals)
-                }
-                
-                state = .success
-            } catch {
-                print("Error searching for professionals: \(error)")
-                state = .failed
+        defer {
+            if !isInitialLoad {
+                isLoadingMore = false
             }
         }
+        
+        do {
+            let searchResponse = try await networkClient.searchProfessionals(
+                limit: itemsPerPage,
+                offset: currentOffset,
+                sortBy: sortOption.apiParameter
+            )
+            
+            totalItems = searchResponse.count
+            
+            if isInitialLoad {
+                professionals = searchResponse.professionals
+            } else {
+                professionals.append(contentsOf: searchResponse.professionals)
+            }
+            
+            state = .success
+        } catch {
+            print("Error searching professionals: \(error)")
+            state = .failed
+        }
     }
-
-    func loadMoreProfessionals() {
+    
+    func loadMoreProfessionals() async {
         guard !isLoadingMore && hasMorePages else { return }
         currentPage += 1
-        searchProfessionals(isInitialLoad: false)
+        await searchProfessionals(isInitialLoad: false)
     }
 }

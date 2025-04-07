@@ -26,21 +26,20 @@ class ProfessionalDetailsViewModel: BaseViewModel {
     
     // MARK: - Public Methods
     
-    func fetchProfessionalDetails(id: Int) {
+    func fetchProfessionalDetails(id: Int) async {
         state = .loading
         
-        Task {
-            do {
-                print("Fetching professional details")
-                let professional = try await networkClient.professionalDetails(id: id)
-                self.professional = professional
-                
-                state = .success
-            } catch {
-                print("Error fetchin professional details: \(error.localizedDescription)")
-                state = .failed
-            }
+        do {
+            print("Fetching professional details")
+            let professional = try await networkClient.professionalDetails(id: id)
+            self.professional = professional
+            
+            state = .success
+        } catch {
+            print("Error fetchin professional details: \(error.localizedDescription)")
+            state = .failed
         }
+        
         
     }
     

@@ -35,15 +35,17 @@ struct ProfessionalListView: View {
                     Text("Couldn't find any professionals")
                 } description: {
                     Button("Retry") {
-                        viewModel.searchProfessionals()
+                        Task {
+                                await viewModel.searchProfessionals()
+                            }
                     }
                 }
             }
             
         }
-        .onAppear {
+        .task {
             if firstTime {
-                viewModel.searchProfessionals()
+                await viewModel.searchProfessionals()
                 firstTime = false
             }
         }
@@ -62,8 +64,8 @@ extension ProfessionalListView {
                 // Invisible view that triggers loading more when it "appears"
                 Color.clear
                     .frame(height: 20)
-                    .onAppear {
-                        viewModel.loadMoreProfessionals()
+                    .task {
+                        await viewModel.loadMoreProfessionals()
                     }
             }
         }

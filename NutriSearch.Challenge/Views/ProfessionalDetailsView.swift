@@ -32,13 +32,15 @@ struct ProfessionalDetailsView: View {
                     Text("Failed to load the details")
                 } description: {
                     Button("Retry") {
-                        viewModel.fetchProfessionalDetails(id: professionalId)
+                        Task {
+                           await viewModel.fetchProfessionalDetails(id: professionalId)
+                        }
                     }
                 }
             }
         }
-        .onAppear {
-            viewModel.fetchProfessionalDetails(id: professionalId)
+        .task {
+            await viewModel.fetchProfessionalDetails(id: professionalId)
         }
     }
 }
