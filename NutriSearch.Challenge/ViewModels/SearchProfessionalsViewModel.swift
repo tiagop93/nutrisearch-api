@@ -46,7 +46,6 @@ class SearchProfessionalsViewModel: BaseViewModel {
     var hasMorePages: Bool {
         professionals.count < totalItems
     }
-    var isOfflineMode = false
     
     // MARK: Initialization
     
@@ -110,12 +109,7 @@ class SearchProfessionalsViewModel: BaseViewModel {
                 
                 state = .success
             } catch {
-                
-                if case NetworkError.noInternetConnection = error {
-                    isOfflineMode = true
-                }
-                
-                print("Error searching for professionals: \(error.localizedDescription)")
+                print("Error searching for professionals: \(error)")
                 state = .failed
             }
         }

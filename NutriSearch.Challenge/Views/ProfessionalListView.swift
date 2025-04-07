@@ -72,5 +72,5 @@ extension ProfessionalListView {
 
 #Preview {
     ProfessionalListView()
-        .environment(SearchProfessionalsViewModel(networkClient: NetworkClient()))
+        .environment(SearchProfessionalsViewModel(networkClient: MockNetworkClient()))
 }

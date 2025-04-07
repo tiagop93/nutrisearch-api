@@ -31,6 +31,6 @@ struct MainView: View {
 
 #Preview {
     MainView()
-        .environment(NetworkStatusObserver(reachability: MockNetworkReachability(isConnected: false)))
-        .environment(SearchProfessionalsViewModel(networkClient: NetworkClient()))
+        .environment(NetworkStatusObserver(reachability: MockNetworkReachability(isConnected: true)))
+        .environment(SearchProfessionalsViewModel(networkClient: MockNetworkClient()))
 }
