@@ -46,6 +46,7 @@ class SearchProfessionalsViewModel: BaseViewModel {
     var hasMorePages: Bool {
         professionals.count < totalItems
     }
+    var isOfflineMode = false
     
     // MARK: Initialization
     
@@ -84,6 +85,13 @@ class SearchProfessionalsViewModel: BaseViewModel {
         }
         
         Task {
+            
+            defer {
+                if !isInitialLoad {
+                    isLoadingMore = false
+                }
+            }
+            
             do {
                 print("Searching for professionals")
                 let searchResponse = try await networkClient.searchProfessionals(
@@ -101,17 +109,14 @@ class SearchProfessionalsViewModel: BaseViewModel {
                 }
                 
                 state = .success
-                
-                if !isInitialLoad {
-                    isLoadingMore = false
-                }
             } catch {
+                
+                if case NetworkError.noInternetConnection = error {
+                    isOfflineMode = true
+                }
+                
                 print("Error searching for professionals: \(error.localizedDescription)")
                 state = .failed
-                
-                if !isInitialLoad {
-                    isLoadingMore = false
-                }
             }
         }
     }

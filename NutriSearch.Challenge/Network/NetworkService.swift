@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Network Protocol
 
 protocol NetworkService {
-    func request<T: Decodable>(endpoint: Endpoint, queryItems: [URLQueryItem]?) async throws -> T
+    func request<T: Codable>(endpoint: Endpoint, queryItems: [URLQueryItem]?) async throws -> T
     
     func searchProfessionals(limit: Int, offset: Int, sortBy: String?) async throws -> SearchResponse
     func professionalDetails(id: Int) async throws -> Professional
@@ -21,5 +21,6 @@ protocol NetworkService {
 enum NetworkError: Error {
     case invalidURL
     case invalidResponse
+    case noInternetConnection
     case decodingError(Error)
 }

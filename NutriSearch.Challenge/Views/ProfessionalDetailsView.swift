@@ -9,16 +9,32 @@ import SwiftUI
 
 struct ProfessionalDetailsView: View {
     
+    @Environment(NetworkStatusObserver.self) private var networkObserver
     @State private var viewModel = ProfessionalDetailsViewModel(networkClient: NetworkClient())
     let professionalId: Int
     
     var body: some View {
         VStack {
-            if let professional = viewModel.professional {
-                HeaderView(professional: professional)
-                AboutMeView(text: professional.aboutMe)
-                    .padding()
-                Spacer()
+            switch viewModel.state {
+            case .none, .loading:
+                ProgressView("Loading the details")
+                    .frame(maxWidth: .infinity, minHeight: 100)
+            case .success:
+                if let professional = viewModel.professional {
+                    HeaderView(professional: professional)
+                        .offlineIndicator(isOffline: networkObserver.isOffline)
+                    AboutMeView(text: professional.aboutMe)
+                        .padding()
+                    Spacer()
+                }
+            case .failed:
+                ContentUnavailableView {
+                    Text("Failed to load the details")
+                } description: {
+                    Button("Retry") {
+                        viewModel.fetchProfessionalDetails(id: professionalId)
+                    }
+                }
             }
         }
         .onAppear {
@@ -135,4 +151,5 @@ extension ProfessionalDetailsView {
 
 #Preview {
     ProfessionalDetailsView(professionalId: 4)
+        .environment(NetworkStatusObserver(reachability: MockNetworkReachability(isConnected: false)))
 }

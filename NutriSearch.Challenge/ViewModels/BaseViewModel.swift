@@ -19,7 +19,20 @@ class BaseViewModel {
         case failed
     }
     
+    // MARK: Network State Enum
+    
+    enum NetworkState: Equatable {
+        case online
+        case offline
+        
+        var isOffline: Bool {
+            return self == .offline
+        }
+    }
+    
     // MARK: - Properties
     
     var state: State = .none
+    var networkState: NetworkState = .online
+    
 }

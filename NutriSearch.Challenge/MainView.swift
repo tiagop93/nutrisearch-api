@@ -9,7 +9,8 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State private var viewModel = SearchProfessionalsViewModel(networkClient: NetworkClient())
+    @Environment(NetworkStatusObserver.self) private var networkObserver
+    @Environment(SearchProfessionalsViewModel.self) private var viewModel
     
     var body: some View {
         NavigationStack {
@@ -19,15 +20,17 @@ struct MainView: View {
                 Spacer()
                 
                 ProfessionalListView()
+                    .offlineIndicator(isOffline: networkObserver.isOffline)
                 
             }
             .navigationTitle("NutriSearch")
             .navigationBarTitleDisplayMode(.inline)
         }
-        .environment(viewModel)
     }
 }
 
 #Preview {
     MainView()
+        .environment(NetworkStatusObserver(reachability: MockNetworkReachability(isConnected: false)))
+        .environment(SearchProfessionalsViewModel(networkClient: NetworkClient()))
 }

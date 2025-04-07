@@ -14,14 +14,45 @@ struct NetworkClient: NetworkService {
     // MARK: Properties
     
     private let session: URLSession
+    private let cacheService: CacheService
+    private let reachability: NetworkReachability
     
-    init(session: URLSession = .shared) {
+    init(
+        session: URLSession = .shared,
+        cacheService: CacheService = DiskCacheService(),
+        reachability: NetworkReachability = DefaultNetworkReachability()
+    ) {
         self.session = session
+        self.cacheService = cacheService
+        self.reachability = reachability
     }
     
     // MARK: Network Methods
     
-    func request<T>(endpoint: Endpoint, queryItems: [URLQueryItem]?) async throws -> T where T : Decodable {
+    func request<T>(endpoint: Endpoint, queryItems: [URLQueryItem]?) async throws -> T where T : Codable {
+        let cacheKey = cacheService.generateCacheKey(for: endpoint, queryItems: queryItems)
+        
+        // Has cache
+        if let cachedData: CachedResponse<T> = try? cacheService.load(forKey: cacheKey) {
+            // Is fresh
+            if cacheService.isFresh(cachedData.timestamp) {
+                print("Using fresh cache")
+                return cachedData.data
+            }
+            
+            // When offline
+            if !reachability.isConnected {
+                // If it's not expired
+                if !cacheService.isExpired(cachedData.timestamp) {
+                    print("Using non-expired cache while offline")
+                    return cachedData.data
+                } else {
+                    // Cache has expired
+                    throw NetworkError.noInternetConnection
+                }
+            }
+        }
+      
         guard let endpointUrl = endpoint.url(), var urlComponents = URLComponents(url: endpointUrl, resolvingAgainstBaseURL: true) else {
             throw NetworkError.invalidURL
         }
@@ -45,7 +76,13 @@ struct NetworkClient: NetworkService {
         
         do {
             let jsonDecoder = JSONDecoder.defaultDecoder
-            return try jsonDecoder.decode(T.self, from: data)
+            let decodedData = try jsonDecoder.decode(T.self, from: data)
+            
+            // cache the response
+            let cachedResponse = CachedResponse(data: decodedData, timestamp: Date())
+            try cacheService.save(cachedResponse, forKey: cacheKey)
+            
+            return decodedData
         } catch {
             throw NetworkError.decodingError(error)
         }
