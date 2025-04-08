@@ -62,7 +62,7 @@ class SearchProfessionalsViewModel: BaseViewModel {
             .sink { [weak self] newSortOption in
                 guard let self = self else { return }
                 Task {
-                    await self.searchProfessionals()
+                    await self.searchProfessionals(isInitialLoad: true)
                 }
             }
             .store(in: &cancellables)
@@ -83,6 +83,7 @@ class SearchProfessionalsViewModel: BaseViewModel {
         }
         
         defer {
+            // Execute at the end
             if !isInitialLoad {
                 isLoadingMore = false
             }

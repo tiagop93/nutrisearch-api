@@ -18,6 +18,7 @@ struct ProfessionalListView: View {
             case .none, .loading:
                 ProgressView("Searching for Professionals")
                     .frame(maxWidth: .infinity, minHeight: 100)
+                    .id(UUID())
             case .success:
                 ForEach(viewModel.professionals) { professional in
                     NavigationLink {
