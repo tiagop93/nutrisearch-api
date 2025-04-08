@@ -16,11 +16,13 @@ struct MainView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 DropdownView()
+                    .accessibilityIdentifier("DropdownView")
                 
                 Spacer()
                 
                 ProfessionalListView()
                     .offlineIndicator(isOffline: networkObserver.isOffline)
+                    .accessibilityIdentifier("ProfessionalListView")
                 
             }
             .navigationTitle("NutriSearch")
@@ -32,5 +34,5 @@ struct MainView: View {
 #Preview {
     MainView()
         .environment(NetworkStatusObserver(reachability: MockNetworkReachability(isConnected: true)))
-        .environment(SearchProfessionalsViewModel(networkClient: MockNetworkClient()))
+        .environment(SearchProfessionalsViewModel(networkClient: MockNetworkClient(shouldSimulateNetworkDelay: true)))
 }

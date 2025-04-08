@@ -17,6 +17,7 @@ struct DropdownView: View {
             Picker("Sort", selection: $viewModel.sortOption) {
                 ForEach(SortOption.allCases) { option in
                     Text(option.rawValue).tag(option)
+                        .accessibilityIdentifier(option.rawValue)
                 }
             }
             .pickerStyle(.menu)

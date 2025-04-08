@@ -19,7 +19,8 @@ final class DiskCacheServiceTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        cacheService = DiskCacheService(expirationInterval: 60, freshInterval: 10)
+        let tempDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        cacheService = DiskCacheService(expirationInterval: 60, freshInterval: 10, cacheDirectory: tempDirectory)
     }
     
     override func tearDown() {

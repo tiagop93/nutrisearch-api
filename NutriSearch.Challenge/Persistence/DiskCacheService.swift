@@ -14,7 +14,7 @@ class DiskCacheService: CacheService {
     // MARK: Properties
     
     private let fileManager = FileManager.default
-    private let cacheName = "NutriSearchCache"
+    private let cacheDirectory: URL
     private let expirationInterval: TimeInterval
     private let freshInterval: TimeInterval
     
@@ -22,22 +22,24 @@ class DiskCacheService: CacheService {
     
     init(
         expirationInterval: TimeInterval = 60 * 60 * 24,
-        freshInterval: TimeInterval = 60 * 5
+        freshInterval: TimeInterval = 60 * 5,
+        cacheDirectory: URL? = nil
     ) {
         self.expirationInterval = expirationInterval
         self.freshInterval = freshInterval
-    }
-    
-    private var cacheDirectory: URL {
-        let cachesURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let directoryURL = cachesURL.appendingPathComponent(cacheName, isDirectory: true)
         
-        // Create directory if it doesn't exist
-        if !fileManager.fileExists(atPath: directoryURL.path) {
-            try? fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        // Use provided cache path or fallback to default app cache
+        if let cacheDirectory = cacheDirectory {
+            self.cacheDirectory = cacheDirectory
+        } else {
+            let cachesURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            self.cacheDirectory = cachesURL.appendingPathComponent("NutriSearchCache", isDirectory: true)
         }
-        
-        return directoryURL
+
+        // Create directory if it doesn't exist
+        if !fileManager.fileExists(atPath: self.cacheDirectory.path) {
+            try? fileManager.createDirectory(at: self.cacheDirectory, withIntermediateDirectories: true)
+        }
     }
     
     private func fileURL(forKey key: String) -> URL {
@@ -95,9 +97,15 @@ class DiskCacheService: CacheService {
     }
     
     func clearCache() throws {
-        let contents = try fileManager.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
-        for url in contents {
-            try fileManager.removeItem(at: url)
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
+            for url in contents {
+                try fileManager.removeItem(at: url)
+            }
+            print("🧹 Cache cleared successfully.")
+        } catch {
+            print("⚠️ Failed to clear cache: \(error)")
+            throw error
         }
     }
 }

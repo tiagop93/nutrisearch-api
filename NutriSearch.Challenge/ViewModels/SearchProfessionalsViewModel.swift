@@ -83,7 +83,7 @@ class SearchProfessionalsViewModel: BaseViewModel {
         }
         
         defer {
-            // Execute at the end
+            // Execute at the end of scope
             if !isInitialLoad {
                 isLoadingMore = false
             }

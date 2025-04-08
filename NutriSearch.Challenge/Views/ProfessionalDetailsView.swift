@@ -19,6 +19,7 @@ struct ProfessionalDetailsView: View {
             case .none, .loading:
                 ProgressView("Loading the details")
                     .frame(maxWidth: .infinity, minHeight: 100)
+                    .accessibilityIdentifier("DetailsProgressView")
             case .success:
                 if let professional = viewModel.professional {
                     HeaderView(professional: professional)

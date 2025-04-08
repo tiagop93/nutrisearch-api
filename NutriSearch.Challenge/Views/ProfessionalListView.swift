@@ -19,6 +19,7 @@ struct ProfessionalListView: View {
                 ProgressView("Searching for Professionals")
                     .frame(maxWidth: .infinity, minHeight: 100)
                     .id(UUID())
+                    .accessibilityIdentifier("ProgressView")
             case .success:
                 ForEach(viewModel.professionals) { professional in
                     NavigationLink {
@@ -37,8 +38,8 @@ struct ProfessionalListView: View {
                 } description: {
                     Button("Retry") {
                         Task {
-                                await viewModel.searchProfessionals()
-                            }
+                            await viewModel.searchProfessionals()
+                        }
                     }
                 }
             }
